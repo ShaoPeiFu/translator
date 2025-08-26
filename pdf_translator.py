@@ -260,8 +260,8 @@ class PDFTranslator:
 
             # PDF对比格式
             pdf_path = os.path.join(output_dir, f"{filename}_comparison.pdf")
-            pdf_result = self.pdf_processor.export_translation_result(
-                original_text, translated_text, pdf_path, "pdf"
+            pdf_result = self.pdf_processor.create_enhanced_comparison_pdf(
+                original_text, translated_text, pdf_path, preserve_formatting=True
             )
             export_results["pdf"] = pdf_result
 
@@ -294,6 +294,29 @@ class PDFTranslator:
             创建结果
         """
         try:
+            # 检查输出目录权限
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                try:
+                    os.makedirs(output_dir, exist_ok=True)
+                except PermissionError:
+                    return {
+                        "status": "error",
+                        "error": f"无法创建输出目录: {output_dir}",
+                    }
+                except Exception as e:
+                    return {"status": "error", "error": f"创建输出目录失败: {str(e)}"}
+
+            # 检查文件写入权限
+            try:
+                with open(output_path, "w") as f:
+                    pass
+                os.remove(output_path)
+            except PermissionError:
+                return {"status": "error", "error": f"没有写入权限: {output_path}"}
+            except Exception as e:
+                return {"status": "error", "error": f"检查文件权限失败: {str(e)}"}
+
             from reportlab.lib.pagesizes import A4, landscape
             from reportlab.platypus import (
                 SimpleDocTemplate,
@@ -308,30 +331,41 @@ class PDFTranslator:
             from reportlab.pdfbase import pdfmetrics
             from reportlab.pdfbase.ttfonts import TTFont
 
-            # 尝试注册中文字体
+            # 改进的字体注册逻辑
+            chinese_font = "Helvetica"  # 默认字体
+
             try:
-                # 对于Windows系统
-                pdfmetrics.registerFont(TTFont("SimSun", "C:/Windows/Fonts/simsun.ttc"))
-                chinese_font = "SimSun"
-            except:
-                try:
-                    # 对于macOS系统
-                    pdfmetrics.registerFont(
-                        TTFont("PingFang", "/System/Library/Fonts/PingFang.ttc")
-                    )
-                    chinese_font = "PingFang"
-                except:
-                    try:
-                        # 对于Linux系统
-                        pdfmetrics.registerFont(
-                            TTFont(
-                                "DejaVuSans",
-                                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                            )
-                        )
-                        chinese_font = "DejaVuSans"
-                    except:
-                        chinese_font = "Helvetica"  # 默认字体
+                # 对于macOS系统 - 尝试多个可能的字体路径
+                mac_fonts = [
+                    "/System/Library/Fonts/PingFang.ttc",
+                    "/System/Library/Fonts/STHeiti Light.ttc",
+                    "/System/Library/Fonts/STHeiti Medium.ttc",
+                    "/Library/Fonts/Arial Unicode MS.ttf",
+                    "/System/Library/Fonts/Helvetica.ttc",
+                ]
+
+                for font_path in mac_fonts:
+                    if os.path.exists(font_path):
+                        try:
+                            if font_path.endswith(".ttc"):
+                                # 对于.ttc字体文件，尝试注册
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                            elif font_path.endswith(".ttf"):
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                        except Exception:
+                            continue
+
+            except Exception:
+                # 如果字体注册失败，使用默认字体
+                chinese_font = "Helvetica"
 
             # 创建横向PDF文档
             doc = SimpleDocTemplate(output_path, pagesize=landscape(A4))
@@ -387,7 +421,7 @@ class PDFTranslator:
             )
 
             # 限制段落数量避免过长
-            max_display = min(max_paragraphs, 15)
+            max_display = min(max_paragraphs, 50)  # 增加到50段，显示更多内容
 
             # 创建对比表格
             table_data = []
@@ -448,7 +482,7 @@ class PDFTranslator:
                 story.append(Spacer(1, 15))
                 story.append(
                     Paragraph(
-                        f"... (显示前{max_display}段，共{max_paragraphs}段，完整内容请查看完整PDF)",
+                        f"注意: 由于内容较长，此处显示了前{max_display}段内容。完整内容请查看生成的PDF文件。",
                         content_style,
                     )
                 )
@@ -456,10 +490,20 @@ class PDFTranslator:
             # 生成PDF
             doc.build(story)
 
-            return {"status": "success", "output_path": output_path, "format": "pdf"}
+            # 验证文件是否成功创建
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return {
+                    "status": "success",
+                    "output_path": output_path,
+                    "format": "pdf",
+                }
+            else:
+                return {"status": "error", "error": "PDF文件生成失败或文件为空"}
 
+        except ImportError as e:
+            return {"status": "error", "error": f"缺少必要的依赖库: {str(e)}"}
         except Exception as e:
-            return {"status": "error", "error": str(e)}
+            return {"status": "error", "error": f"PDF生成过程中出现错误: {str(e)}"}
 
     def get_translation_summary(
         self, translation_results: List[Dict[str, str]]

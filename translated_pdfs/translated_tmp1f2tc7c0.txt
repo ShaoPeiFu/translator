@@ -1,0 +1,292 @@
+=== 原文 ===
+COMPSCI4004/COMPSCI5087AI(H/M) COMPSCI4004/COMPSCI5087 AI (H/M) Week 2: Introduction and Foundations Debasis Ganguly 1 1UniversityofGlasgow,Glasgow,UK September 30, 2024 D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Overview Course Introduction What is AI? Why is AI difficult? Agents-Centric view of AI Rationality of Agents Environment Types Agent types D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) CourseIntroduction Lecturers and Time table ▶ Lecturers: ▶ Dr. Debasis Ganguly, Debasis.Ganguly@glasgow.ac.uk (course coordinator). ▶ Dr. Edmond S. L. Ho, Shu-Lim.Ho@glasgow.ac.uk ▶ GTAs (for lab support): ▶ Jie Wang ▶ Yuxuan Xie ▶ Lectures: Mondays: 15:00-17:00 at Boyd Orr - Room 412 (LC01) ▶ Lab sessions: Mondays: 09:00-11:00 (you will be allocated specific 1 hour timeslot) at BOYD ORR 720 ▶ Open Hours: ▶ Edmond Ho - Friday 12 noon - 1 PM, SAWB 402, Sir Alwyn Williams Building. ▶ Debasis Ganguly - Friday 2 PM - 4 PM, M111 Sir Alwyn Williams Building. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) CourseIntroduction Course Information ▶ AI (H and M): Overview of intelligent agent design. ▶ Fundamental concepts of AI. ▶ We’ll explain various stages and complexities of an agent-driven model that interacts with an environment and makes sequence of rational decisions. ▶ Non-examinable materials: ▶ Recent advancements in AI. ▶ Responsible AI (explainability, trustworthiness and fairness). ▶ Labs: ▶ Labs in Week will be based on the lecture notes covered in Week −1. ▶ Labs aren’t graded but you should complete the exercises. We will release the solutions the next day. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) CourseIntroduction Intended outcomes 1. Demonstrate familiarity with the history of AI, philosophical debates, and understand the potential and limitations of the subject in its current form. 2. Explain the basic components of an intelligent agent, and be able to map these onto other specific subjects such as information retrieval, computer vision, human-computer interaction etc. 3. Discuss basic issues in planning and rational decision making. 4. Explain and apply search-based problem-solving techniques. 5. Formulate and apply Bayesian networks in modelling and planning. 6. Explain and apply utility theory as probabilistic framework for rational decision making. 7. Explain and apply reinforcement learning techniques to learn from rewards and observations. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) CourseIntroduction Road Map of Weekly Teachings 2. Introduction and Foundations 3. Deterministic problems - search and optimisation 4. Stochastic Problems, Probability and Knowledge Representation 5. Decision-making under uncertainty 6. Sequential decision-making under uncertainty - MDPs 7. Learning from rewards and observations - basic Reinforcement Learning 8. Learning from rewards and observations - Reinforcement Learning with linear and non-linear function approximation 9. Learning from rewards and observations - improved DQN and policy search (with function approximation) 10. Explainable AI/ Artificial General Intelligence (AGI) 11. Practical Problem Solving and Revision D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhatisAI? Four Different Viewpoints Thinking Humanly Thinking Rationally Acting Humanly Acting Rationally ▶ The most popular view-point: Acting Humanly - the Turing Test approach. ▶ Natural Language Processing: Communication. ▶ Knowledge Representation: Relations between entities. ▶ Automated Reasoning: Use the stored information to answer questions and draw new conclusions. ▶ Machine learning: Adapt to new circumstances and extrapolate patterns. ▶ Computer vision: Perceive objects and scenes ▶ Robotics: Manipulate objects. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhatisAI? Mentimeter Go to mentimeter.com; use code ‘4760 0586’. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhatisAI? Example AI Systems ▶ IBM’s Deep Blue defeats Garry Kasparov, the world champion in chess in 1997. ▶ Modern chess engines like Alpha-Zero, StockFish etc. are much better than human players: ≈ 3500 ELO as compared to ≈ 2830 of Magnus Carlsen! D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhatisAI? Example AI Systems ▶ IBM’s Watson system competed on Jeopardy! winning the first-place prize of 1 million USD. ▶ Leverages NLP/Information Retrieval and Knowledge-bases for effective Question Answering. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhatisAI? Example AI Systems ▶ Open AI’s Chat-GPT is large language model (LLM) that is able to converse with humans or other LLMs. ▶ Leverages: ▶ Pre-training onlargevolumesoftextdata ▶ Representscontextofwords(tokens)ashighdimensionalvectors. ▶ AsteptowardsArtificialGeneralIntelligence. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhyisAIdifficult? Why is AI difficult ▶ AI has been successfully applied for specific tasks, achieving super or comparable human performance. ▶ Examples: Game playing (Chess/ Atari games), question answering (Chat-GPT), self-driving cars etc. ▶ But are the machines really “intelligent”? ▶ What is the definition of “intelligence”? “Averygeneralmentalcapabilitythat,amongotherthings,involvesthe abilitytoreason,plan,solveproblems,thinkabstractly,comprehend complexideas,learnquicklyandlearnfromexperience. Itisnotmerely booklearning,anarrowacademicskill,ortest-takingsmarts. Rather,it reflectsabroaderanddeepercapabilityforcomprehendingour surroundings...” ▶ We have progressed well on the aspects colored as blue. ▶ What about other more general tasks, such as the ones shown in red? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhyisAIdifficult? Bongard Problems ▶ InventedbytheRussiancomputerscientistMikhailMoiseevichBongard. ▶ PopularizedbyDouglasHofstadterinhisPulitzerprizewinner-Godel,Escher andBach. Task ▶ Explain(inlanguage),whytheimagesontheleftdifferentfromthoseinthe right. ▶ Teststheabstractthinkingcapacity. Largefiguresvs. Smallfigures Smallfigurepresentvs. Nosmallfigurepresent D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhyisAIdifficult? Characteristics of (Human) Intelligence ▶ Different levels of abstraction. ▶ What combinations of attributes to use to define an object. ▶ Some are more fine-grained (e.g., number of corners, lines etc.) than others (e.g., convexity). ▶ Moving back and forth between these representations to define how are objects similar and how are they dissimilar, specific to task. ▶ Left: BP denotes an abstract property for the understanding of numbers 3 and 4. More fine-grained concepts of corners, lines, wedges don’t work. Right: An abstract concept of density is required. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhyisAIdifficult? What is possible today (2024)? ▶ Drivesafelyalongacurvingmountainroad? ▶ DrivesafelyalongUniversityAvenueinthefirstweekofthesemester? ▶ Buyaweek’sworthofgroceriesontheweb? ▶ Playadecentgameof-Bridge/Go/Chess? ▶ Discoverandproveanewmathematicaltheorem? ▶ Designandexecutearesearchprograminmolecularbiology? ▶ Writeanintentionallyfunnystory? ▶ Givecompetentlegaladviceinaspecializedareaoflaw? ▶ Conversesuccessfullywithanotherpersonforanhour? ▶ Performacomplexsurgicaloperation? ▶ Unloadanydishwasherandputeverythingaway? ▶ Playadecentgameoftabletennis? ▶ Explainyourfeelingandemotionstoothers? ▶ Learn,adaptanddevelopoverseveraldecades? ▶ Learnanewmotorskillfromafewexamples? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) WhyisAIdifficult? Types of Learning in AI ▶ Unsupervised learning (learning without teacher) ▶ Example: Discover patterns within the data. ▶ Figure out which data is similar to what and different from others. ▶ Supervised Learning. ▶ Multi-class classification: Is this movie review positive, neutral, or negative? ▶ Multi-label classification: More than one class can be present in an instance, e.g., objects within an image. ▶ Update model parameter based on the examples. ▶ This course will cover the very basics. Covered at more depth in the ML course. ▶ Reinforcemennt Learning ▶ Learning to be adapitve within an environment. ▶ Example: You want to find out your way out of maze. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI Key question: How should we study, design and build intelligent agents that behave rationally? ▶ What is an agent? ▶ An agent is anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators (includes humans, robots, chatbots, thermostats). D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI Agent function The agent function (as implemented by the agent program) maps from prior/build-in knowledge, π, and percepts, P, to actions A, i.e., : P,π → ▶ Percepts, P: Perceptual inputs, percepts, and sequence/history as reported by the sensors. ▶ Actuators and actions, A: What ever means the agent has to influence the environment via its actuators (visual, physical, audio, computer commands, etc.) D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI Agent function (Contd.) ▶ Prior knowledge, π: Any hard coded constraints or knowledge about the environment (e.g. if temperature < -40 degrees is not good). ▶ Function, f: ▶ An abstract, external characterization of the agent by mathematical function which can be represented by mathematical object such as look-up table, continuous or discrete function. ▶ Implemented as agent program and runs on physical device. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI PEAS model ▶ It is useful to ‘think’ about any AI task as PEAS model. ▶ Performance measure: - Defines what “good behaviour” is in specific context. ▶ Environment: specification of the physical (or virtual) environment the agent is expected to operate in. ▶ Actuators: The types and physical properties of the actuators available to the agent. Limits what the agent can do. ▶ Sensors: The types and physical properties of the sensors available to the agent. Limits what the agent can know about the environment. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI PEAS view of existing AI models ▶ Performance measure: Maze finding Minimize #steps taken, or time spent in the maze. ▶ Environment: Size of the maze, start, goal, paths and obstacles. ▶ Actuators: Movement through grid - virtually or physically. ▶ Sensors: Reacting to obstacle - virtually or physically. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI PEAS view of existing AI models ▶ Performance measure: Maximize - correctness, relevance, or Minimize - Chat-GPT reading effort, misninformation of the answer. ▶ Environment: The virtual space of all possible answers (quantized in terms of tokens). ▶ Actuators: Generating token conditioned on the input and what’s generated before. ▶ Sensors: The API interface that gets user’s text. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agents-CentricviewofAI PEAS view of existing AI models ▶ Performance measure: Maximize - safety, or Minimize - time to reach destination (performance Self-Driving Cars measures can be conflicting with each other!). ▶ Environment: The surface on which the car is driven, the obstacles, road corners etc. ▶ Actuators: Brake, accelerator, gear. ▶ Sensors: Sequences of images captured, or other physical sensors like wetness of the road etc. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) RationalityofAgents An agent should behave rationally ▶ What is rational behaviour? What does it mean to do thing ‘the right way’? ▶ Objective answer: Consider the consequences (the ‘P’ of the PEAS model) of an agent’s behaviour. ▶ For each possible percept (sequence), P, rational agent selects an action (sequence) which is expected to maximize its performance measure given the evidence provided by the percept (sequence) so far and whatever prior/built-in knowledge the agent has. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) RationalityofAgents Rationality in the vacuum world EAS of the vacuum world AI task ▶ E: two rooms (no prior knowledge about the prior likelihood of the dirt distribution). ▶ A: Left, Right, Suck ▶ S: Correctly identify if room is clean. Which ‘P’ leads to rationality? 1. +1 for sucking up portion of dirt. 2. +1 for each clear square observed. 3. +1 for each clear square; -0.1 for taking an action due to battery usage. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) RationalityofAgents Rationality in the vacuum world Rule of Thumb Choose performance measure (P) on the basis of: ▶ Objective view-point: What is required in the environment. ▶ Subjective view-point: NOT on how an agent should behave. ▶ Which agents are rational? 1. Cleans square if dirty, otherwise moves to the other square over period of 1000 time steps (say checks every 10 min). 2. Cleans floors moving back and forth continuously for an hour and then goes to sleep for the day waking up after 23 hours. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) RationalityofAgents What IS Rationality and what it IS NOT? Rationality IS NOT omniscient ▶ An agent can’t know the precise outcome of the action in the environment. ▶ It can only estimate the outcome based on previous percepts. Rationality DOES NOT imply success ▶ Being rational does not imply success in solving the task. ▶ Example: Think about uncertain environments. Rationality CAN LEAD to exploration, learning and autonomy ▶ Example: An irrational maze-finder can just continue to move back and forth; but then it doesn’t learn the possible ways out of the maze. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) EnvironmentTypes Fully observable vs. partially observable ▶ Fully observable: Access to all relevant information via the sensors. ▶ Partially observable: If an agent acts based on noisy or broken sensors - or sensors simply do not capture the relevant information. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) EnvironmentTypes Deterministic vs. Stochastic ▶ Deterministic: The next state of the environment is fully captured by current state and the action to be carried out. ▶ Stochastic: Can not determine the next state based on current state and action due to randomness (or unknowns) in the environment. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) EnvironmentTypes Static vs. Dynamic ▶ Static: The environment never changes. ▶ Dynamic: The environment changes while we decide what to do, time matters! ▶ Example: Ice melts (at certain rate) on the frozen lake environment. ▶ Example: Dirt accumulates with certain probability in the vacuum world environment. ▶ Semi-Static: The world is the same, but the performance score changes. ▶ Example: Performance measure changed to maximizing battery life as opposed to just the room cleanliness in the vacuum world. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) EnvironmentTypes More environment types Discrete vs. Continuous ▶ Discrete: State of the environment are determined among set of discrete possibilities (e.g. chess), discrete actions (e.g. move left or right), discrete percepts (e.g. dirty, not dirty) ▶ Continuous: The world has infinitely many states (e.g. temperature), actions are continuous, percepts are continuous (human vision). Episodic vs. Sequential ▶ Episodic: Single actions based on current percept only, e.g., vacuum world. ▶ Sequential: Current action influences all future decisions, e.g., chess, maze finder. Single agent vs. multi-aDg.eGanngtulyenvirCoOMnPmSCeI4n00t4s/COMPSCI5087AI(H/M) Multiple agents can cooperate or compete to fulfill individual or group goals.
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Tabular (Rule-based) Agents ▶ pre-configured look-up table of state transitions. ▶ Keeps the entire percept sequence in memory. ▶ Feasible to define for small-scaled task such as vacuuming two rooms. [A, clean] (cid:55)→ Right ... D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M) [A, clean], [A, clean], [A, Dirty] (cid:55)→ Suck ▶ Not feasible where the state space is large. ▶ Can you define set of specific rules for an AI agent to play chess?
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Reflex-based Agents ▶ TheactionisNOTafunctionof historicalperceptsbutdepends ONLYonthecurrentpercept (state). ▶ Whathappensifweonlyhavea ‘dirt’sensor,andno‘location’ sensor? ▶ Whatdowedoifthe stateisclean? Ifwedon’t movewegetstuck. ▶ Ifwemovethenhowcan wefigureoutthe direction? Movingleft from‘A’willcausean infiniteloop! ▶ Ifstatus==‘Dirty’then‘Suck’ ▶ Doesrandomizingactions ▶ Iflocation==‘A’thenreturn‘Right’ solvethis? ▶ Iflocation==‘B’thenreturn‘Left’ D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Model-based Agents ▶ Reflex-based agent: Doesn’t keep track of how the environment changes with an action; ▶ e.g., Sucking dirt may introduce new state where room is neither completely clean, nor completely dirty. ▶ model-based agent learns mapping between the actions and consequences. ▶ Can reflex-based agent for 2 room environment also work on 4 room one? What about model-based agent? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Goal-based Agents ▶ Forsomeproblemsthegoalstate(s) is(are)known. ▶ Thereare2goalstatesforthe vacuumworld-twoclean roomswiththeagentinany oneofthem. ▶ Arationalagentshouldthenperform actionsthatresultsinstatesthatare ‘closer’tothegoalstate. ▶ Weneedthenanevaluationfunction overstatestomeasurethis closeness. ▶ Forthevacuumworld,howdo wecomputehowfararewe fromthegoal? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+▶ Move towards the goal that’s ‘closer’ from the current state. ▶ Reach trade-off (Utility-based agents). ▶ Try to maximize the performance as much as possible. COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Limitations of Goal-based Agents ▶ What should an agent do when there are: ▶ Multiple goals? ▶ Conflicting goals? ▶ Ill-specified goals (e.g., ‘user satisfaction’ for conversational agent)? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Limitations of Goal-based Agents ▶ Move towards the goal ▶ What should an agent do that’s ‘closer’ from the when there are: current state. ▶ Multiple goals? ▶ Reach trade-off ▶ Conflicting goals? ▶ (Utility-based agents). Ill-specified goals (e.g., ▶ ‘user satisfaction’ for Try to maximize the conversational agent)? performance as much as possible. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Utility-based Agents ▶ Alittlebitofdirtintheotherroom withenoughbatteryremainingtobe rechargedisabettergoalthanwith afullydeadbatteryandtwoclean rooms. ▶ Needatrade-off: whichis whatwedobydefininga utilityfunction. ▶ Arationalagentshouldthenperform actionsthatresultsinstatesthat maximizeutility. ▶ Forthevacuumworld,whatis agoodutilityfunction? ▶ u(state)= 0.9×cleanliness+0.1×charge? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Generalized Learning Agent (Motivation) ▶ Can the most capable agents that we have looked thus far, viz. goal-based and utility-based agents that has been designed to perform well in the first environment also do well in the second? ▶ Why or why not (consider the following)? ▶ Environments are stochastic. ▶ State distribution is different. ▶ What needs to be changed? D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Generalized Learning Agent (Design) ▶ Performance Element: Selects actions - similar to static agent as we have seen so far. ▶ Learning Element: Finds improvements. ▶ Critic Element: Feedback from the environment which affects ‘Learning Element’. ▶ Problem Generator: Choose sub-optimal paths to explore more about the environment to discover better actions in the long run. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Generalized Learning Agent (back to the example) ▶ Performance Element: Utility function that minimizes the risk of falling down into hole and maximizes the chance of getting the reward. ▶ Learning Element: Discover that two adjacent holes are more risky than single one (this was not hard-coded into the utility function). ▶ Critic Element: Gives high negative reward when an agent actually falls into hole. ▶ Problem Generator: The agent needs to fall into holes (some risk taking ability) to improve its learning of maneuvering techniques around holes. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Summary Now you know about: ▶ PEAS - Performance, Environment, Actuators, Sensors. ▶ Agent types - Journey from Reflex-based agents to Utility-based agents. ▶ Learning Agents - the most capable one. To Do: ▶ Go through the lecture notes and try out the exercises from Chapter 2 of the AIMA book. ▶ Attend Week 3’s lab and carry out the exercises. D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) Agenttypes Anonymous Feedback for Continuous Monitoring D.Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+=== 翻译 ===
+COMPSCI4004/COMPSCI5087 人工智能 (荣誉/硕士) COMPSCI4004/COMPSCI5087 人工智能 (荣誉/硕士) 第2周：介绍与基础 Debasis Ganguly 1 1格拉斯哥大学，英国格拉斯哥 2024年9月30日 D. Ganguly COMPSCI4004/COMPSCI5087 人工智能 (荣誉/硕士)
+
+COMPSCI4004/COMPSCI5087 人工智能 (荣誉/硕士) 概览 课程介绍 什么是人工智能。为什么人工智能很难。基于代理的人工智能视角 代理的合理性 环境类型 代理类型 D. Ganguly COMPSCI4004/COMPSCI5087 人工智能 (荣誉/硕士)
+
+COMPSCI4004/COMPSCI5087 人工智能 (荣誉/硕士) 课程介绍 讲师和时间表 ▶ 讲师: ▶ Dr. Debasis Ganguly, Debasis.Ganguly@glasgow.ac.uk（课程协调人）。 ▶ Dr. Edmond S. L. Ho, Shu-Lim.Ho@glasgow.ac.uk ▶ 实验室助教（提供实验室支持）: ▶ Jie Wang ▶ Yuxuan Xie ▶ 讲座: 星期一: 15:00-17:00 在 Boyd Orr - 房间 412 (LC01) ▶ 实验课: 星期一: 09:00-11:00（您将被分配特定的一小时时间段）在 BOYD ORR 720 ▶ 办公时间: ▶ Edmond Ho - 星期五中午12点至下午1点, SAWB 402, Sir Alwyn Williams Building
+
+▶ Debasis Ganguly - 星期五 下午2点至4点，M111 Sir Alwyn Williams Building。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 课程介绍 课程信息
+▶ AI（H和M）：智能代理设计概述。
+▶ AI的基本概念。
+▶ 我们将解释与环境交互并做出一系列理性决策的代理驱动模型的各种阶段和复杂性。
+▶ 非考试内容：
+▶ AI的最新进展。
+▶ 负责任的AI（可解释性、可信度和公平性）。
+▶ 实验室：
+▶ 每周的实验室基于前一周讲义中涵盖的内容。
+▶ 实验室不计分，但你应该完成练习。我们将在次日发布答案。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 课程介绍 预期成果
+1. 展示对AI历史、哲学辩论的熟悉程度，并理解当前形式下该学科的潜力和局限性。
+
+解释智能代理的基本组成部分，并能够将这些概念映射到其他特定领域，如信息检索、计算机视觉、人机交互等。3. 讨论规划和理性决策中的基本问题。4. 解释并应用基于搜索的问题解决技术。5. 建立并应用贝叶斯网络进行建模和规划。6. 解释并应用效用理论作为理性决策的概率框架。7. 解释并应用强化学习技术从奖励和观察中学习。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 课程介绍 每周教学路线图 2. 引言与基础 3. 确定性问题 - 搜索与优化 4. 随机问题、概率与知识表示 5. 不确定条件下的决策制定 6. 不确定条件下顺序决策 - MDPs 7
+
+从奖励和观察中学习 - 基础强化学习 8. 从奖励和观察中学习 - 使用线性和非线性函数逼近的强化学习 9. 从奖励和观察中学习 - 改进的DQN和策略搜索（带函数逼近） 10. 可解释的人工智能/通用人工智能(AGI) 11. 实际问题解决与复习 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 什么是人工智能。四种不同的观点 以人类的方式思考 以理性的方式思考 以人类的方式行动 以理性的方式行动
+▶ 最受欢迎的观点：以人类的方式行动 - 图灵测试方法。
+▶ 自然语言处理：交流。
+▶ 知识表示：实体之间的关系。
+▶ 自动推理：利用存储的信息来回答问题并得出新的结论。
+▶ 机器学习：适应新环境并推断模式。
+▶ 计算机视觉：感知物体和场景。
+▶ 机器人学：操控物体。
+
+Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 什么是人工智能。Mentimeter 请访问mentimeter.com；使用代码‘4760 0586’。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 什么是人工智能。示例人工智能系统 ▶ IBM的深蓝在1997年击败了国际象棋世界冠军加里·卡斯帕罗夫。▶ 现代象棋引擎如Alpha-Zero、StockFish等远胜于人类玩家：约为3500 ELO，相比之下马格努斯·卡尔森为约2830 ELO。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 什么是人工智能。示例人工智能系统 ▶ IBM的沃森系统参加了《危险边缘》比赛，并赢得了100万美元的一等奖。▶ 利用自然语言处理/信息检索和知识库来实现有效的问答。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 什么是人工智能。示例人工智能系统 ▶ Open AI的Chat-GPT是一个大型语言模型（LLM），能够与人类或其他LLM进行对话。
+
+▶ 利用：▶ 大量文本数据的预训练 ▶ 将词语（词元）的上下文表示为高维向量。 ▶ 朝着通用人工智能迈出的一步。 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 为什么AI很难。 为什么AI很难 ▶ AI已经在特定任务上成功应用，达到了超越或与人类相当的表现。 ▶ 例子：游戏（国际象棋/雅达利游戏）、问答（Chat-GPT）、自动驾驶汽车等。 ▶ 但是机器真的“智能”吗？ ▶ “智能”的定义是什么？ “一种非常普遍的心理能力，它包括但不限于推理、计划、解决问题、抽象思考、理解复杂概念、快速学习以及从经验中学习的能力。它不仅仅是书本知识、狭隘的学术技能或应试技巧。相反，它反映了更广泛和深入的理解周围环境的能力。” ▶ 我们在蓝色标注的方面取得了很好的进展
+
+▶ 那么对于其他更一般的任务，比如用红色标出的任务。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 为什么AI很难。邦加德问题 ▶ 由俄罗斯计算机科学家米哈伊尔·莫伊谢耶维奇·邦加德发明。 ▶ 由道格拉斯·霍夫施塔特在他的普利策奖获奖作品《哥德尔、埃舍尔、巴赫》中推广。任务 ▶ 用语言解释为什么左边的图像与右边的不同。 ▶ 测试抽象思维能力。大图形对比小图形 小图形存在对比没有小图形 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 为什么AI很难。(人类)智能的特点 ▶ 不同层次的抽象。 ▶ 使用哪些属性组合来定义一个对象。 ▶ 有些属性更加细致（例如，角的数量、线条等），而另一些则较为宽泛（例如，凸性）。 ▶ 在这些表示之间来回切换以定义对象之间的相似性和差异性，这取决于具体任务。
+
+▶ 左：BP 表示理解数字3和4的一个抽象属性。更细化的概念如角、线、楔形不起作用。右：需要一个密度的抽象概念。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 为什么AI很难。今天（2024年）可能实现什么。 ▶ 沿着蜿蜒的山路安全驾驶。 ▶ 在学期的第一周沿着大学大道安全驾驶。 ▶ 在网上购买一周的食物杂货。 ▶ 下一局不错的桥牌/围棋/国际象棋。 ▶ 发现并证明一个新的数学定理。 ▶ 设计并执行一项分子生物学研究计划。 ▶ 写一篇有意图搞笑的故事。 ▶ 在法律的某个专门领域提供称职的法律建议。 ▶ 与另一个人成功交谈一个小时。 ▶ 执行复杂的外科手术。 ▶ 卸载洗碗机并将所有东西放好。 ▶ 打一场不错的乒乓球比赛。 ▶ 向他人解释你的感受和情绪。 ▶ 在几十年间学习、适应和发展。 ▶ 从几个例子中学习新的运动技能。 D
+
+Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 为什么AI很难。AI中的学习类型 ▶ 无监督学习（没有教师的学习） ▶ 例如：在数据中发现模式。 ▶ 弄清楚哪些数据与什么相似，又与哪些不同。 ▶ 监督学习。 ▶ 多类分类：这条电影评论是正面的、中立的还是负面的。 ▶ 多标签分类：一个实例中可以存在多个类别，例如，图像中的对象。 ▶ 根据示例更新模型参数。 ▶ 本课程将涵盖非常基础的内容。在机器学习课程中有更深入的讲解。 ▶ 强化学习 ▶ 学会在环境中适应。 ▶ 例如：你想找到走出迷宫的方法。 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的AI视角 关键问题：我们应该如何研究、设计和构建行为理性的智能代理。 ▶ 什么是代理
+
+▶ 代理是指任何可以通过传感器感知其环境并通过执行器对该环境采取行动的事物（包括人类、机器人、聊天机器人、恒温器）。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的人工智能视角 代理功能 代理功能（由代理程序实现）将先前/内置的知识π和感知P映射到动作A上，即：: P, π → A
+▶ 感知，P：由传感器报告的感知输入、感知以及序列/历史。
+▶ 执行器与动作，A：代理通过其执行器影响环境的任何方式（视觉、物理、音频、计算机命令等）。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的人工智能视角 代理功能 (续)
+▶ 先前知识，π：关于环境的任何硬编码约束或知识（例如，如果温度低于-40度是不好的）。
+
+▶ 函数 f: ▶ 通过数学函数对代理进行抽象的外部描述，该函数可以由查找表、连续或离散函数等数学对象表示。▶ 实现为代理程序并在物理设备上运行。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的人工智能视角 PEAS 模型 ▶ 将任何人工智能任务视为PEAS模型是有用的。▶ 性能度量：- 在特定上下文中定义什么是“良好行为”。▶ 环境：指定代理预期操作的物理（或虚拟）环境。▶ 执行器：代理可用执行器的类型及其物理特性。限制了代理能够做什么。▶ 传感器：代理可用传感器的类型及其物理特性。限制了代理能够了解环境的信息。D
+
+Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的人工智能视角 PEAS视角下的现有AI模型 ▶ 性能指标：迷宫寻路 最小化在迷宫中行走的步数或花费的时间。 ▶ 环境：迷宫的大小、起点、终点、路径及障碍物。 ▶ 执行器：通过网格移动——虚拟或物理方式。 ▶ 传感器：对障碍物作出反应——虚拟或物理方式。 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的人工智能视角 PEAS视角下的现有AI模型 ▶ 性能指标：最大化——准确性、相关性，或最小化——Chat-GPT阅读努力、答案中的错误信息。 ▶ 环境：所有可能答案构成的虚拟空间（以token为单位量化）。 ▶ 执行器：基于输入和之前生成的内容生成token。 ▶ 传感器：获取用户文本的API接口。 D
+
+Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 以代理为中心的人工智能视角 PEAS视角下的现有AI模型
+▶ 性能指标：最大化安全性，或最小化到达目的地的时间（性能指标之间可能存在冲突）。
+▶ 环境：汽车行驶的表面、障碍物、道路弯道等。
+▶ 执行器：刹车、油门、档位。
+▶ 传感器：捕获的图像序列，或其他物理传感器如路面湿度等。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理的理性行为 代理应表现出理性行为
+▶ 什么是理性行为。做事情“正确的方式”意味着什么。
+▶ 客观答案：考虑代理行为的结果（PEAS模型中的‘P’）。
+
+▶ 对于每个可能的感知（序列），P，理性代理会选择一个动作（序列），该动作预期能够根据迄今为止由感知（序列）提供的证据以及代理拥有的任何先验/内置知识来最大化其性能指标。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理的合理性 真空世界中的合理性 真空世界的EAS AI任务 ▶ E: 两个房间（关于灰尘分布的先验可能性没有预先的知识）。 ▶ A: 左移、右移、吸尘 ▶ S: 正确识别房间是否干净。 哪个‘P’导致了合理性。 1. 吸入部分灰尘得+1分。 2. 观察到每块干净区域得+1分。 3. 每块干净区域得+1分；因使用电池而采取行动扣-0.1分。 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理的合理性 真空世界中的合理性 经验法则 根据以下原则选择性能指标(P)： ▶ 客观视角：环境中需要什么
+
+▶ 主观视角：不是关于代理应该如何行为。 ▶ 哪些代理是理性的。 1. 如果脏了就清理，否则在1000个时间步骤（比如每10分钟检查一次）内移动到另一个方格。 2. 连续来回移动清洁地板一个小时，然后休息一天，在23小时后醒来。 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理的理性 什么是理性以及什么不是理性。 理性并不意味着全知全能 ▶ 代理不能知道其行动在环境中的确切结果。 ▶ 它只能根据之前的感知来估计结果。 理性并不意味着成功 ▶ 表现得理性并不意味着能够成功完成任务。 ▶ 例子：考虑不确定的环境。 理性可以导致探索、学习和自主性 ▶ 例子：一个非理性的迷宫寻找者可能会一直来回移动；但这样它就不会学到走出迷宫的可能路径。 D
+
+Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 环境类型 完全可观测与部分可观测
+▶ 完全可观测：通过传感器可以访问所有相关信息。
+▶ 部分可观测：如果代理基于有噪声或损坏的传感器行动——或者传感器根本无法捕捉到相关信息。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 环境类型 确定性与随机性
+▶ 确定性：环境的下一个状态完全由当前状态和即将执行的动作决定。
+▶ 随机性：由于环境中存在随机因素（或未知因素），不能根据当前状态和动作来确定下一个状态。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 环境类型 静态与动态
+▶ 静态：环境永远不会改变。
+▶ 动态：在我们决定如何行动时，环境会发生变化，时间是一个重要因素。
+
+▶ 示例：冰在结冰的湖面上以一定的速度融化。
+▶ 示例：灰尘以一定的概率在真空世界环境中积累。
+▶ 半静态：世界保持不变，但性能得分发生变化。
+▶ 示例：在真空世界中，性能指标从仅仅关注房间清洁度转变为最大化电池寿命。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 环境类型 更多环境类型 离散与连续
+▶ 离散：环境状态是从一组离散的可能性中确定的（例如国际象棋），动作是离散的（例如向左或向右移动），感知也是离散的（例如脏、不脏）。
+▶ 连续：世界有无限多种状态（例如温度），动作是连续的，感知也是连续的（如人类视觉）。
+片段式与顺序式
+▶ 片段式：仅基于当前感知采取单一行动，例如，在真空世界中。
+▶ 顺序式：当前行动影响所有未来的决策，例如...
+
+, 国际象棋, 迷宫寻找者。单智能体与多智能体。在COMPSCI4004/COMPSCI5087人工智能（荣誉/硕士）课程中，多个智能体可以合作或竞争以实现个人或团体目标。COMPSCI4004/COMPSCI5087AI(H/M) 智能体类型 表格（基于规则）智能体 ▶ 预配置的状态转换查找表。 ▶ 将整个感知序列保存在内存中。 ▶ 对于小规模任务如清扫两个房间是可行的定义方式。[A, 清洁] (cid:55)→ 右移。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M) [A, 清洁], [A, 清洁], [A, 脏] (cid:55)→ 吸尘 ▶ 当状态空间很大时不可行。 ▶ 你能为一个玩国际象棋的人工智能智能体定义一套具体的规则吗？COMPSCI4004/COMPSCI5087AI(H/M) 智能体类型 反射式智能体 ▶ 动作不是历史感知的函数，而是仅依赖于当前感知（状态）。 ▶ 如果我们只有“脏污”传感器而没有“位置”传感器会发生什么。 ▶ 如果状态是清洁的我们应该怎么做。如果我们不动就会卡住。 ▶ 如果我们移动了，那么如何确定方向。
+
+从‘A’向左移动会导致无限循环。▶ 如果状态==‘脏’则执行‘吸尘’ ▶ 执行随机动作 ▶ 如果位置==‘A’则返回‘右’ 解决这个问题。▶ 如果位置==‘B’则返回‘左’ D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 基于模型的代理 ▶ 基于反射的代理：不跟踪环境如何随动作变化；▶ 例如，吸尘可能会引入一个新的状态，在这个状态下房间既不是完全干净也不是完全脏。▶ 基于模型的代理学习动作与后果之间的映射。▶ 对于两房间环境有效的基于反射的代理是否也能适用于四房间环境？基于模型的代理呢？D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 目标导向型代理 ▶ 对于某些问题，目标状态是已知的。▶ 在真空世界中有两个目标状态——两个干净的房间，并且代理位于其中任何一个房间内。▶ 理性的代理应该执行那些能够使状态更接近目标状态的动作。
+
+▶ 我们需要一个状态评估函数来衡量这种接近程度。
+▶ 对于真空世界，我们如何计算距离目标还有多远。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+▶ 朝向从当前状态来看更“近”的目标移动。
+▶ 达成折衷（基于效用的代理）。
+▶ 尽可能最大化性能。COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 基于目标的代理的局限性
+▶ 当存在以下情况时，代理应该怎么做：
+▶ 多个目标。
+▶ 相互冲突的目标。
+▶ 不明确的目标（例如，对话代理中的“用户满意度”）。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 基于目标的代理的局限性
+▶ 朝向目标移动
+▶ 当存在以下情况时，代理应该怎么做：从当前状态来看更“近”的目标。
+▶ 多个目标。
+▶ 达成折衷
+▶ 相互冲突的目标。（基于效用的代理）
+不明确的目标（例如，对话代理中的“用户满意度”）。
+▶ 尽可能最大化性能
+
+D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 基于效用的代理
+▶ 在另一个房间有一点灰尘，但电池剩余电量足够充电，这比在两个房间都干净但电池完全耗尽的情况要好。
+▶ 需要权衡：这就是我们通过定义一个效用函数来做的事情。
+▶ 理性的代理应该执行那些导致状态最大化效用的动作。
+▶ 对于吸尘器世界来说，一个好的效用函数是什么？
+▶ u(状态) = 0.9×清洁度 + 0.1×电量。 D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 通用学习代理（动机）
+▶ 到目前为止，我们所看到的能力最强的代理，即目标导向型和基于效用的代理，在第一个环境中设计得非常好，它们是否也能在第二个环境中表现良好？
+▶ 为什么可以或不可以（考虑以下几点）。
+▶ 环境是随机的。
+▶ 状态分布不同。
+▶ 需要做哪些改变。 D
+
+Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 通用学习代理（设计）
+▶ 执行元素：选择动作 - 类似于我们迄今为止所见的静态代理。
+▶ 学习元素：寻找改进。
+▶ 评价元素：来自环境的反馈，影响“学习元素”。
+▶ 问题生成器：选择次优路径以进一步探索环境，从而在长远来看发现更好的动作。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 通用学习代理（回到示例）
+▶ 执行元素：效用函数最小化掉入洞中的风险，并最大化获得奖励的机会。
+▶ 学习元素：发现两个相邻的洞比单个洞更危险（这一点并未硬编码到效用函数中）。
+▶ 评价元素：当代理实际上掉入洞中时，给出高负奖励。
+
+▶ 问题生成器：代理需要掉入洞中（具备一定的风险承担能力），以提高其在洞周围操控技巧的学习。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型总结
+现在你已经了解了：
+▶ PEAS - 性能、环境、执行器、传感器。
+▶ 代理类型 - 从基于反射的代理到基于效用的代理的发展历程。
+▶ 学习型代理 - 最有能力的一种。
+待办事项：
+▶ 阅读讲义并尝试完成《人工智能：一种现代方法》第二章中的练习题。
+▶ 参加第三周的实验课，并完成相关练习。D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)
+
+COMPSCI4004/COMPSCI5087AI(H/M) 代理类型 匿名反馈用于持续监控
+D. Ganguly COMPSCI4004/COMPSCI5087AI(H/M)

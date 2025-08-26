@@ -196,6 +196,29 @@ class PDFProcessor:
             创建结果
         """
         try:
+            # 检查输出目录权限
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                try:
+                    os.makedirs(output_dir, exist_ok=True)
+                except PermissionError:
+                    return {
+                        "status": "error",
+                        "error": f"无法创建输出目录: {output_dir}",
+                    }
+                except Exception as e:
+                    return {"status": "error", "error": f"创建输出目录失败: {str(e)}"}
+
+            # 检查文件写入权限
+            try:
+                with open(output_path, "w") as f:
+                    pass
+                os.remove(output_path)
+            except PermissionError:
+                return {"status": "error", "error": f"没有写入权限: {output_path}"}
+            except Exception as e:
+                return {"status": "error", "error": f"检查文件权限失败: {str(e)}"}
+
             from reportlab.lib.pagesizes import A4
             from reportlab.platypus import (
                 SimpleDocTemplate,
@@ -209,30 +232,41 @@ class PDFProcessor:
             from reportlab.pdfbase import pdfmetrics
             from reportlab.pdfbase.ttfonts import TTFont
 
-            # 尝试注册中文字体
+            # 改进的字体注册逻辑
+            chinese_font = "Helvetica"  # 默认字体
+
             try:
-                # 对于Windows系统
-                pdfmetrics.registerFont(TTFont("SimSun", "C:/Windows/Fonts/simsun.ttc"))
-                chinese_font = "SimSun"
-            except:
-                try:
-                    # 对于macOS系统
-                    pdfmetrics.registerFont(
-                        TTFont("PingFang", "/System/Library/Fonts/PingFang.ttc")
-                    )
-                    chinese_font = "PingFang"
-                except:
-                    try:
-                        # 对于Linux系统
-                        pdfmetrics.registerFont(
-                            TTFont(
-                                "DejaVuSans",
-                                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                            )
-                        )
-                        chinese_font = "DejaVuSans"
-                    except:
-                        chinese_font = "Helvetica"  # 默认字体
+                # 对于macOS系统 - 尝试多个可能的字体路径
+                mac_fonts = [
+                    "/System/Library/Fonts/PingFang.ttc",
+                    "/System/Library/Fonts/STHeiti Light.ttc",
+                    "/System/Library/Fonts/STHeiti Medium.ttc",
+                    "/Library/Fonts/Arial Unicode MS.ttf",
+                    "/System/Library/Fonts/Helvetica.ttc",
+                ]
+
+                for font_path in mac_fonts:
+                    if os.path.exists(font_path):
+                        try:
+                            if font_path.endswith(".ttc"):
+                                # 对于.ttc字体文件，尝试注册
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                            elif font_path.endswith(".ttf"):
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                        except Exception:
+                            continue
+
+            except Exception:
+                # 如果字体注册失败，使用默认字体
+                chinese_font = "Helvetica"
 
             # 创建PDF文档
             doc = SimpleDocTemplate(output_path, pagesize=A4)
@@ -270,43 +304,280 @@ class PDFProcessor:
             story.append(Paragraph(title, title_style))
             story.append(Spacer(1, 20))
 
-            # 添加原文
+            # 添加原文 - 显示完整内容，不限制段落数量
             story.append(Paragraph("原文 (Original Text)", subtitle_style))
             story.append(Spacer(1, 10))
 
-            # 处理原文，分段显示
+            # 处理原文，显示所有段落
             original_paragraphs = original_text.split("\n\n")
-            for para in original_paragraphs[:10]:  # 限制段落数量避免过长
+            for para in original_paragraphs:
                 if para.strip():
                     story.append(Paragraph(para.strip(), content_style))
                     story.append(Spacer(1, 8))
-
-            if len(original_paragraphs) > 10:
-                story.append(Paragraph("... (更多内容请查看完整PDF)", content_style))
 
             story.append(PageBreak())
 
-            # 添加翻译
+            # 添加翻译 - 显示完整内容，不限制段落数量
             story.append(Paragraph("翻译 (Translation)", subtitle_style))
             story.append(Spacer(1, 10))
 
-            # 处理翻译文本，分段显示
+            # 处理翻译文本，显示所有段落
             translated_paragraphs = translated_text.split("\n\n")
-            for para in translated_paragraphs[:10]:  # 限制段落数量避免过长
+            for para in translated_paragraphs:
                 if para.strip():
                     story.append(Paragraph(para.strip(), content_style))
                     story.append(Spacer(1, 8))
-
-            if len(translated_paragraphs) > 10:
-                story.append(Paragraph("... (更多内容请查看完整PDF)", content_style))
 
             # 生成PDF
             doc.build(story)
 
-            return {"status": "success", "output_path": output_path, "format": "pdf"}
+            # 验证文件是否成功创建
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return {
+                    "status": "success",
+                    "output_path": output_path,
+                    "format": "pdf",
+                }
+            else:
+                return {"status": "error", "error": "PDF文件生成失败或文件为空"}
 
+        except ImportError as e:
+            return {"status": "error", "error": f"缺少必要的依赖库: {str(e)}"}
         except Exception as e:
-            return {"status": "error", "error": str(e)}
+            return {"status": "error", "error": f"PDF生成过程中出现错误: {str(e)}"}
+
+    def create_enhanced_comparison_pdf(
+        self,
+        original_text: str,
+        translated_text: str,
+        output_path: str,
+        title: str = "翻译对比",
+        preserve_formatting: bool = True,
+    ) -> Dict[str, str]:
+        """
+        创建增强的PDF对比，更好地保留格式和显示完整内容
+
+        Args:
+            original_text: 原文
+            translated_text: 翻译文本
+            output_path: 输出PDF路径
+            title: PDF标题
+            preserve_formatting: 是否保留格式
+
+        Returns:
+            创建结果
+        """
+        try:
+            # 检查输出目录权限
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_path):
+                try:
+                    os.makedirs(output_dir, exist_ok=True)
+                except PermissionError:
+                    return {
+                        "status": "error",
+                        "error": f"无法创建输出目录: {output_dir}",
+                    }
+                except Exception as e:
+                    return {"status": "error", "error": f"创建输出目录失败: {str(e)}"}
+
+            from reportlab.lib.pagesizes import A4
+            from reportlab.platypus import (
+                SimpleDocTemplate,
+                Paragraph,
+                Spacer,
+                PageBreak,
+                Table,
+                TableStyle,
+            )
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.lib import colors
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+
+            # 改进的字体注册逻辑
+            chinese_font = "Helvetica"
+
+            try:
+                # 对于macOS系统 - 尝试多个可能的字体路径
+                mac_fonts = [
+                    "/System/Library/Fonts/PingFang.ttc",
+                    "/System/Library/Fonts/STHeiti Light.ttc",
+                    "/System/Library/Fonts/STHeiti Medium.ttc",
+                    "/Library/Fonts/Arial Unicode MS.ttf",
+                    "/System/Library/Fonts/Helvetica.ttc",
+                ]
+
+                for font_path in mac_fonts:
+                    if os.path.exists(font_path):
+                        try:
+                            if font_path.endswith(".ttc"):
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                            elif font_path.endswith(".ttf"):
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                        except Exception:
+                            continue
+
+            except Exception:
+                chinese_font = "Helvetica"
+
+            # 创建PDF文档
+            doc = SimpleDocTemplate(output_path, pagesize=A4)
+            story = []
+
+            # 定义样式
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                "CustomTitle",
+                parent=styles["Heading1"],
+                fontSize=18,
+                spaceAfter=30,
+                alignment=1,
+                fontName=chinese_font,
+            )
+
+            subtitle_style = ParagraphStyle(
+                "CustomSubtitle",
+                parent=styles["Heading2"],
+                fontSize=14,
+                spaceAfter=20,
+                fontName=chinese_font,
+            )
+
+            content_style = ParagraphStyle(
+                "CustomContent",
+                parent=styles["Normal"],
+                fontSize=10,
+                spaceAfter=12,
+                fontName=chinese_font,
+                leading=14,
+            )
+
+            # 添加标题
+            story.append(Paragraph(title, title_style))
+            story.append(Spacer(1, 20))
+
+            if preserve_formatting:
+                # 使用表格格式进行对比
+                story.append(Paragraph("原文与翻译对比", subtitle_style))
+                story.append(Spacer(1, 15))
+
+                # 分割文本为段落
+                original_paragraphs = [
+                    p.strip() for p in original_text.split("\n\n") if p.strip()
+                ]
+                translated_paragraphs = [
+                    p.strip() for p in translated_text.split("\n\n") if p.strip()
+                ]
+
+                # 确保两个列表长度一致
+                max_paragraphs = max(
+                    len(original_paragraphs), len(translated_paragraphs)
+                )
+                original_paragraphs.extend(
+                    [""] * (max_paragraphs - len(original_paragraphs))
+                )
+                translated_paragraphs.extend(
+                    [""] * (max_paragraphs - len(translated_paragraphs))
+                )
+
+                # 创建对比表格
+                table_data = []
+                table_data.append(
+                    [
+                        Paragraph("原文 (Original)", subtitle_style),
+                        Paragraph("翻译 (Translation)", subtitle_style),
+                    ]
+                )
+
+                # 添加所有段落到表格
+                for i, (orig, trans) in enumerate(
+                    zip(original_paragraphs, translated_paragraphs)
+                ):
+                    if orig or trans:  # 只添加非空段落
+                        table_data.append(
+                            [
+                                Paragraph(orig, content_style),
+                                Paragraph(trans, content_style),
+                            ]
+                        )
+
+                # 创建表格
+                table = Table(
+                    table_data, colWidths=[doc.width / 2 - 20, doc.width / 2 - 20]
+                )
+                table.setStyle(
+                    TableStyle(
+                        [
+                            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                            ("FONTNAME", (0, 0), (-1, 0), chinese_font),
+                            ("FONTSIZE", (0, 0), (-1, 0), 12),
+                            ("FONTNAME", (0, 1), (-1, -1), chinese_font),
+                            ("FONTSIZE", (0, 1), (-1, -1), 9),
+                            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                            ("TOPPADDING", (0, 0), (-1, -1), 6),
+                            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                            ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+                            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                        ]
+                    )
+                )
+
+                story.append(table)
+            else:
+                # 使用分页格式
+                # 添加原文
+                story.append(Paragraph("原文 (Original Text)", subtitle_style))
+                story.append(Spacer(1, 10))
+
+                # 处理原文，显示所有段落
+                original_paragraphs = original_text.split("\n\n")
+                for para in original_paragraphs:
+                    if para.strip():
+                        story.append(Paragraph(para.strip(), content_style))
+                        story.append(Spacer(1, 8))
+
+                story.append(PageBreak())
+
+                # 添加翻译
+                story.append(Paragraph("翻译 (Translation)", subtitle_style))
+                story.append(Spacer(1, 10))
+
+                # 处理翻译文本，显示所有段落
+                translated_paragraphs = translated_text.split("\n\n")
+                for para in translated_paragraphs:
+                    if para.strip():
+                        story.append(Paragraph(para.strip(), content_style))
+                        story.append(Spacer(1, 8))
+
+            # 生成PDF
+            doc.build(story)
+
+            # 验证文件是否成功创建
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return {
+                    "status": "success",
+                    "output_path": output_path,
+                    "format": "pdf",
+                }
+            else:
+                return {"status": "error", "error": "PDF文件生成失败或文件为空"}
+
+        except ImportError as e:
+            return {"status": "error", "error": f"缺少必要的依赖库: {str(e)}"}
+        except Exception as e:
+            return {"status": "error", "error": f"PDF生成过程中出现错误: {str(e)}"}
 
     def export_translation_result(
         self,

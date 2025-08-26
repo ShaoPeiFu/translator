@@ -23,12 +23,13 @@ with st.sidebar:
     st.header("⚙️ 配置")
 
     # API密钥输入
-    api_key = st.text_input(
-        "DASHSCOPE API密钥",
-        value=os.getenv("DASHSCOPE_API_KEY", ""),
-        type="password",
-        help="请输入你的阿里云DashScope API密钥",
-    )
+    # api_key = st.text_input(
+    #     "DASHSCOPE API密钥",
+    #     value=os.getenv("DASHSCOPE_API_KEY", ""),
+    #     type="password",
+    #     help="请输入你的阿里云DashScope API密钥",
+    # )
+    api_key = os.getenv("DASHSCOPE_API_KEY")
 
     # 模型选择
     model_options = ["qwen-max", "qwen-plus", "qwen-turbo"]
@@ -40,14 +41,14 @@ with st.sidebar:
     # 最大token数
     max_tokens = st.slider("最大输出长度", 500, 4000, 2000, 100)
 
-    st.markdown("---")
-    st.markdown("### 📚 功能特性")
-    st.markdown("- ✨ 智能英语翻译")
-    st.markdown("- 🔍 语言自动检测")
-    st.markdown("- 📝 批量翻译支持")
-    st.markdown("- 📖 术语表翻译")
-    st.markdown("- 📄 PDF文档翻译")
-    st.markdown("- 💾 翻译历史记录")
+    # st.markdown("---")
+    # st.markdown("### 📚 功能特性")
+    # st.markdown("- ✨ 智能英语翻译")
+    # st.markdown("- 🔍 语言自动检测")
+    # st.markdown("- 📝 批量翻译支持")
+    # st.markdown("- 📖 术语表翻译")
+    # st.markdown("- 📄 PDF文档翻译")
+    # st.markdown("- 💾 翻译历史记录")
 
 # 主界面
 if not api_key:
@@ -87,7 +88,7 @@ try:
             )
 
             # 翻译按钮
-            if st.button("🚀 开始翻译", type="primary", use_container_width=True):
+            if st.button("开始翻译", type="primary", use_container_width=True):
                 if input_text.strip():
                     with st.spinner("正在翻译中..."):
                         # 语言检测
@@ -409,7 +410,45 @@ try:
 
                                 else:
                                     st.warning("⚠️ PDF对比文档生成失败")
-                                    st.info("请检查PDF生成权限或重新尝试翻译")
+
+                                    # 显示详细的错误信息
+                                    pdf_error = (
+                                        result.get("export_result", {})
+                                        .get("formats", {})
+                                        .get("pdf", {})
+                                    )
+                                    if pdf_error and pdf_error.get("error"):
+                                        st.error(f"错误详情: {pdf_error['error']}")
+
+                                    # 提供调试信息
+                                    with st.expander("🔍 调试信息"):
+                                        st.write("**导出结果状态:**")
+                                        st.json(result.get("export_result", {}))
+
+                                        st.write("**PDF格式状态:**")
+                                        st.json(
+                                            result.get("export_result", {})
+                                            .get("formats", {})
+                                            .get("pdf", {})
+                                        )
+
+                                    # 提供解决方案建议
+                                    st.info("💡 解决方案建议:")
+                                    st.markdown(
+                                        """
+                                    1. **检查权限**: 确保应用有写入输出目录的权限
+                                    2. **检查依赖**: 确保已安装reportlab库 (`pip install reportlab`)
+                                    3. **检查字体**: 系统可能缺少中文字体支持
+                                    4. **重新尝试**: 点击翻译按钮重新生成
+                                    5. **查看日志**: 检查控制台输出的详细错误信息
+                                    """
+                                    )
+
+                                    # 提供手动重试按钮
+                                    if st.button(
+                                        "🔄 重新生成PDF对比", type="secondary"
+                                    ):
+                                        st.rerun()
 
                                 # 下载链接
                                 st.subheader("💾 下载翻译结果")
