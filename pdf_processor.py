@@ -579,6 +579,325 @@ class PDFProcessor:
         except Exception as e:
             return {"status": "error", "error": f"PDF生成过程中出现错误: {str(e)}"}
 
+    def create_mineru_optimized_pdf(
+        self,
+        original_text: str,
+        translated_text: str,
+        output_path: str,
+        title: str = "翻译对比 - MinerU优化排版",
+    ) -> Dict[str, str]:
+        """
+        使用MinerU排版优化创建PDF对比
+
+        Args:
+            original_text: 原文
+            translated_text: 翻译文本
+            output_path: 输出PDF路径
+            title: PDF标题
+
+        Returns:
+            创建结果
+        """
+        try:
+            # 检查输出目录权限
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                try:
+                    os.makedirs(output_dir, exist_ok=True)
+                except PermissionError:
+                    return {
+                        "status": "error",
+                        "error": f"无法创建输出目录: {output_dir}",
+                    }
+                except Exception as e:
+                    return {"status": "error", "error": f"创建输出目录失败: {str(e)}"}
+
+            from reportlab.lib.pagesizes import A4
+            from reportlab.platypus import (
+                SimpleDocTemplate,
+                Paragraph,
+                Spacer,
+                PageBreak,
+                Table,
+                TableStyle,
+                Frame,
+                PageTemplate,
+                BaseDocTemplate,
+            )
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch, cm
+            from reportlab.lib import colors
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+
+            # 改进的字体注册逻辑
+            chinese_font = "Helvetica"
+
+            try:
+                # 对于macOS系统 - 尝试多个可能的字体路径
+                mac_fonts = [
+                    "/System/Library/Fonts/PingFang.ttc",
+                    "/System/Library/Fonts/STHeiti Light.ttc",
+                    "/System/Library/Fonts/STHeiti Medium.ttc",
+                    "/Library/Fonts/Arial Unicode MS.ttf",
+                    "/System/Library/Fonts/Helvetica.ttc",
+                ]
+
+                for font_path in mac_fonts:
+                    if os.path.exists(font_path):
+                        try:
+                            if font_path.endswith(".ttc"):
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                            elif font_path.endswith(".ttf"):
+                                pdfmetrics.registerFont(
+                                    TTFont("ChineseFont", font_path)
+                                )
+                                chinese_font = "ChineseFont"
+                                break
+                        except Exception:
+                            continue
+
+            except Exception:
+                chinese_font = "Helvetica"
+
+            # 创建PDF文档 - 使用SimpleDocTemplate以获得更多控制
+            doc = SimpleDocTemplate(output_path, pagesize=A4)
+            story = []
+
+            # 定义优化的样式
+            styles = getSampleStyleSheet()
+
+            # 主标题样式 - 更加突出
+            title_style = ParagraphStyle(
+                "EnhancedTitle",
+                parent=styles["Heading1"],
+                fontSize=22,
+                spaceAfter=25,
+                alignment=TA_CENTER,
+                fontName=chinese_font,
+                textColor=colors.darkblue,
+                spaceBefore=15,
+                borderWidth=1,
+                borderColor=colors.darkblue,
+                borderPadding=8,
+                backColor=colors.lightblue,
+            )
+
+            # 副标题样式 - 更清晰
+            subtitle_style = ParagraphStyle(
+                "EnhancedSubtitle",
+                parent=styles["Heading2"],
+                fontSize=16,
+                spaceAfter=20,
+                spaceBefore=12,
+                fontName=chinese_font,
+                textColor=colors.darkgreen,
+                borderWidth=0.5,
+                borderColor=colors.darkgreen,
+                borderPadding=5,
+                backColor=colors.lightgreen,
+            )
+
+            # 内容样式 - 更易读
+            content_style = ParagraphStyle(
+                "EnhancedContent",
+                parent=styles["Normal"],
+                fontSize=11,
+                spaceAfter=10,
+                spaceBefore=5,
+                fontName=chinese_font,
+                leading=16,
+                alignment=TA_LEFT,  # 使用左对齐避免justification问题
+                textColor=colors.black,
+                leftIndent=15,
+                rightIndent=15,
+            )
+
+            # 原文样式 - 特殊标识
+            original_style = ParagraphStyle(
+                "OriginalStyle",
+                parent=content_style,
+                textColor=colors.darkred,
+                backColor=colors.lightgrey,
+                borderWidth=0.5,
+                borderColor=colors.darkred,
+                borderPadding=3,
+                leftIndent=20,
+            )
+
+            # 翻译样式 - 特殊标识
+            translated_style = ParagraphStyle(
+                "TranslatedStyle",
+                parent=content_style,
+                textColor=colors.darkblue,
+                backColor=colors.lightyellow,
+                borderWidth=0.5,
+                borderColor=colors.darkblue,
+                borderPadding=3,
+                leftIndent=20,
+            )
+
+            # 添加主标题
+            story.append(Paragraph(title, title_style))
+            story.append(Spacer(1, 20))
+
+            # 使用MinerU优化的布局
+            # 分割文本为段落
+            original_paragraphs = [
+                p.strip() for p in original_text.split("\n\n") if p.strip()
+            ]
+            translated_paragraphs = [
+                p.strip() for p in translated_text.split("\n\n") if p.strip()
+            ]
+
+            # 确保两个列表长度一致
+            max_paragraphs = max(len(original_paragraphs), len(translated_paragraphs))
+            original_paragraphs.extend(
+                [""] * (max_paragraphs - len(original_paragraphs))
+            )
+            translated_paragraphs.extend(
+                [""] * (max_paragraphs - len(translated_paragraphs))
+            )
+
+            # 创建优化的对比表格
+            table_data = []
+
+            # 表头 - 更加突出
+            table_data.append(
+                [
+                    Paragraph(
+                        "📖 原文 (Original)",
+                        ParagraphStyle(
+                            "TableHeader",
+                            parent=subtitle_style,
+                            alignment=TA_CENTER,
+                            fontSize=14,
+                            backColor=colors.darkred,
+                            textColor=colors.white,
+                            borderPadding=8,
+                        ),
+                    ),
+                    Paragraph(
+                        "🌐 翻译 (Translation)",
+                        ParagraphStyle(
+                            "TableHeader",
+                            parent=subtitle_style,
+                            alignment=TA_CENTER,
+                            fontSize=14,
+                            backColor=colors.darkblue,
+                            textColor=colors.white,
+                            borderPadding=8,
+                        ),
+                    ),
+                ]
+            )
+
+            # 添加所有段落到表格，使用MinerU优化的样式
+            for i, (orig, trans) in enumerate(
+                zip(original_paragraphs, translated_paragraphs)
+            ):
+                if orig or trans:  # 只添加非空段落
+                    # 为段落添加序号标识
+                    orig_para = f"【{i+1}】{orig}" if orig else ""
+                    trans_para = f"【{i+1}】{trans}" if trans else ""
+
+                    table_data.append(
+                        [
+                            (
+                                Paragraph(orig_para, original_style)
+                                if orig
+                                else Paragraph("", content_style)
+                            ),
+                            (
+                                Paragraph(trans_para, translated_style)
+                                if trans
+                                else Paragraph("", content_style)
+                            ),
+                        ]
+                    )
+
+            # 创建表格 - 优化列宽和样式
+            table = Table(
+                table_data,
+                colWidths=[doc.width / 2 - 25, doc.width / 2 - 25],
+                repeatRows=1,  # 重复表头
+            )
+
+            # 优化的表格样式
+            table.setStyle(
+                TableStyle(
+                    [
+                        # 对齐和布局
+                        ("ALIGN", (0, 0), (-1, -1), TA_LEFT),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        # 字体设置
+                        ("FONTNAME", (0, 0), (-1, 0), chinese_font),
+                        ("FONTSIZE", (0, 0), (-1, 0), 14),
+                        ("FONTNAME", (0, 1), (-1, -1), chinese_font),
+                        ("FONTSIZE", (0, 1), (-1, -1), 10),
+                        # 间距设置
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                        ("TOPPADDING", (0, 0), (-1, -1), 8),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                        # 边框和背景
+                        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.darkgrey),
+                        (
+                            "ROWBACKGROUNDS",
+                            (0, 1),
+                            (-1, -1),
+                            [colors.white, colors.lightgrey],
+                        ),
+                        # 特殊行样式
+                        ("LINEBELOW", (0, 0), (-1, 0), 2, colors.black),
+                        ("LINEABOVE", (0, 0), (-1, 0), 2, colors.black),
+                    ]
+                )
+            )
+
+            story.append(table)
+
+            # 添加统计信息
+            story.append(Spacer(1, 20))
+            info_style = ParagraphStyle(
+                "InfoStyle",
+                parent=content_style,
+                fontSize=10,
+                textColor=colors.grey,
+                alignment=TA_CENTER,
+            )
+            story.append(
+                Paragraph(
+                    f"📊 对比统计：原文 {len([p for p in original_paragraphs if p])} 段，"
+                    f"翻译 {len([p for p in translated_paragraphs if p])} 段",
+                    info_style,
+                )
+            )
+
+            # 生成PDF
+            doc.build(story)
+
+            # 验证文件是否成功创建
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return {
+                    "status": "success",
+                    "output_path": output_path,
+                    "format": "mineru_enhanced_pdf",
+                }
+            else:
+                return {"status": "error", "error": "PDF文件生成失败或文件为空"}
+
+        except ImportError as e:
+            return {"status": "error", "error": f"缺少必要的依赖库: {str(e)}"}
+        except Exception as e:
+            return {"status": "error", "error": f"PDF生成过程中出现错误: {str(e)}"}
+
     def export_translation_result(
         self,
         original_text: str,

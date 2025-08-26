@@ -258,12 +258,24 @@ class PDFTranslator:
             )
             export_results["docx"] = docx_result
 
-            # PDF对比格式
-            pdf_path = os.path.join(output_dir, f"{filename}_comparison.pdf")
-            pdf_result = self.pdf_processor.create_enhanced_comparison_pdf(
-                original_text, translated_text, pdf_path, preserve_formatting=True
+            # PDF对比格式 - 使用MinerU优化排版
+            pdf_path = os.path.join(output_dir, f"{filename}_mineru_comparison.pdf")
+            pdf_result = self.pdf_processor.create_mineru_optimized_pdf(
+                original_text, translated_text, pdf_path
             )
-            export_results["pdf"] = pdf_result
+            export_results["mineru_pdf"] = pdf_result
+
+            # 传统PDF对比格式（保持兼容性）
+            traditional_pdf_path = os.path.join(
+                output_dir, f"{filename}_comparison.pdf"
+            )
+            traditional_pdf_result = self.pdf_processor.create_enhanced_comparison_pdf(
+                original_text,
+                translated_text,
+                traditional_pdf_path,
+                preserve_formatting=True,
+            )
+            export_results["pdf"] = traditional_pdf_result
 
             return {
                 "status": "success",
